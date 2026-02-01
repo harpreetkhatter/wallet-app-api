@@ -4,21 +4,21 @@ import dotenv from "dotenv";
 import { initDB } from "./config/db.js";
 import rateLimiter from "./middleware/rateLimiter.js";
 import transactionsRoute from "./routes/transactionsRoute.js";
-
+import job from "./config/cron.js"
 dotenv.config();
 
 const app = express();
 
-// Enable CORS for Expo web
-app.use(cors({
-  origin: ['http://localhost:8082', 'http://localhost:8081', 'http://localhost:3000', 'http://127.0.0.1:8082'],
-  credentials: true
-}));
+
 
 app.use(express.json());
 app.use(rateLimiter);
+if(process.env.NODE_ENV==="production") job.start()
 
 const port = process.env.PORT;
+app.get("/api/health",(req,res)=>{
+  res.status(200).json({status:"ok"})
+})
 
 app.use("/api/transactions", transactionsRoute);
 
